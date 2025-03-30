@@ -1,0 +1,21 @@
+EESchema-DOCLIB  Version 2.0
+#
+$CMP NE555DR
+D Single Precision Timer
+K
+F http://www.ti.com/lit/ds/symlink/ne555.pdf
+$ENDCMP
+#
+$CMP ESP32-DEVKITM-1
+D Development Boards & Kits - Other Processors ESP32 general-purpose development board, embeds ESP32-MINI-1, with pin header
+K
+F https://www.espressif.com/sites/default/files/documentation/esp32-mini-1_datasheet_en.pdf
+$ENDCMP
+#
+$CMP RAC03-3.3SK
+D AC/DC Power Modules 3W 85-264Vin 3.3Vout 900mA
+K
+F https://recom-power.com/pdf/Powerline_AC-DC/RAC03-K.pdf
+$ENDCMP
+#
+#End Doc Library
