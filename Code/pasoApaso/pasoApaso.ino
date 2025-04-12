@@ -1,8 +1,8 @@
 
-#define pin1 2
-#define pin2 4
-#define pin3 16
-#define pin4 17
+#define pin1 6
+#define pin2 7
+#define pin3 8
+#define pin4 9
 #define ms 2.5 // 5 10 15
 
 void setup() {
