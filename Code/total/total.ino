@@ -1,3 +1,9 @@
+#include "DHT.h"
+
+#define DHTPIN 5     // Pin donde está conectado el sensor DHT
+#define DHTTYPE DHT22   // Tipo de sensor DHT (DHT11, DHT22, etc.)
+DHT dht(DHTPIN, DHTTYPE);
+
 // Definición de pines para el L298N
 const int motorPin1 = 6;  // Pin PWM para controlar velocidad en una dirección
 const int motorPin2 = 7; // Pin PWM para controlar velocidad en dirección opuesta
@@ -6,10 +12,18 @@ const int motorPin2 = 7; // Pin PWM para controlar velocidad en dirección opues
 const int motorPin3 = 8;  // Pin PWM para controlar velocidad en una dirección
 const int motorPin4 = 9; // Pin PWM para controlar velocidad en dirección opuesta
 
+// Definición de pines para step motor
+const int bob1 = 10;
+const int bob2 = 11;
+const int bob3 = 12;
+const int bob4 = 13;
+const int mis = 2.5; // 5 10 15
+
 // Variables para el control del motor
 int velocidad1 = 0, velocidad2 = 0;        // Valor PWM (0-255)
 bool direccion1 = true, direccion2 = true;    // true = adelante, false = atrás
 bool modoAutomatico = false;
+char step = 'p';
 
 // Variables para el modo automático
 unsigned long tiempoAnterior = 0;
@@ -17,12 +31,20 @@ const int INTERVALO = 30;  // Intervalo en ms para el cambio de velocidad
 int paso = 1;              // Incremento/decremento de velocidad
 
 void setup() {
-  // Configuración de pines como salida
+  // Configuración motor 1
   pinMode(motorPin1, OUTPUT);
   pinMode(motorPin2, OUTPUT);
-
+  // Configuración motor 2
   pinMode(motorPin3, OUTPUT);
   pinMode(motorPin4, OUTPUT);
+  // Configuración step motor
+  pinMode(bob1, OUTPUT);
+  pinMode(bob2, OUTPUT);
+  pinMode(bob3, OUTPUT);
+  pinMode(bob4, OUTPUT);
+
+  // Configuracion dht22
+  dht.begin();
   
   // Inicializar motor detenido
   digitalWrite(motorPin1, LOW);
@@ -39,6 +61,8 @@ void setup() {
   Serial.println("B+velocidad - Giro en sentido antihorario (0-255)");
   Serial.println("C+velocidad - Giro en sentido horario (0-255)");
   Serial.println("D+velocidad - Giro en sentido antihorario (0-255)");
+  Serial.println("E - Giro en sentido horario (step motor)");
+  Serial.println("F - Giro en sentido antihorario (step motor)");
   Serial.println("S - Detener motor");
   Serial.println("M - Activar/desactivar modo automático");
 }
@@ -54,6 +78,30 @@ void loop() {
   if (modoAutomatico) {
     modoVariacionAutomatica();
   }
+
+  if (step == 'E' || step == 'e') {
+    stepdireccion(bob1, bob2, bob3, bob4, mis);
+    Serial.println("Step motor girando en sentido horario");
+  } else if (step == 'F' || step == 'f') {
+    stepdireccion(bob4, bob3, bob2, bob1, mis);
+    Serial.println("Step motor girando en sentido antihorario");
+  } else if (step == 'P' || step == 'p'){
+    digitalWrite(bob1, LOW);
+    digitalWrite(bob2, LOW);
+    digitalWrite(bob3, LOW);
+    digitalWrite(bob4, LOW);
+    Serial.println("step motor detenido");
+  } else {
+    Serial.println("Comando no reconocido");
+  }
+  // Leer temperatura y humedad
+  float h = dht.readHumidity();
+  float t = dht.readTemperature();
+  Serial.print("Humedad: ");
+  Serial.print(h);
+  Serial.print("%, Temperatura: ");
+  Serial.print(t);
+  Serial.println("°C");
 }
 
 void procesarComando(String comando) {
@@ -61,7 +109,7 @@ void procesarComando(String comando) {
   
   if (comando.length() > 0) {
     char primerCaracter = comando.charAt(0);
-    
+    step = primerCaracter;
     // Detener modo automático si se recibe cualquier comando
     if (primerCaracter != 'M' && modoAutomatico) { 
       modoAutomatico = false;
@@ -216,4 +264,48 @@ void modoVariacionAutomatica() {
       Serial.println(velocidad1);
     }
   }
+}
+
+void stepdireccion(int pin1, int pin2, int pin3, int pin4, int ms){
+  Serial.println("step motor");
+  digitalWrite(pin1, HIGH);
+  digitalWrite(pin2, LOW);
+  digitalWrite(pin3, LOW);
+  digitalWrite(pin4, LOW);
+  delay(ms);
+  digitalWrite(pin1, HIGH);
+  digitalWrite(pin2, HIGH); 
+  digitalWrite(pin3, LOW);
+  digitalWrite(pin4, LOW);
+  delay(ms);
+  digitalWrite(pin1, LOW);
+  digitalWrite(pin2, HIGH);
+  digitalWrite(pin3, LOW);
+  digitalWrite(pin4, LOW);
+  delay(ms);
+  digitalWrite(pin1, LOW);
+  digitalWrite(pin2, HIGH);
+  digitalWrite(pin3, HIGH);
+  digitalWrite(pin4, LOW);
+  delay(ms);
+  digitalWrite(pin1, LOW);
+  digitalWrite(pin2, LOW);
+  digitalWrite(pin3, HIGH);
+  digitalWrite(pin4, LOW);
+  delay(ms);
+  digitalWrite(pin1, LOW);
+  digitalWrite(pin2, LOW);
+  digitalWrite(pin3, HIGH);
+  digitalWrite(pin4, HIGH);
+  delay(ms);
+  digitalWrite(pin1, LOW);
+  digitalWrite(pin2, LOW);
+  digitalWrite(pin3, LOW);
+  digitalWrite(pin4, HIGH);
+  delay(ms);
+  digitalWrite(pin1, HIGH);
+  digitalWrite(pin2, LOW);
+  digitalWrite(pin3, LOW);
+  digitalWrite(pin4, HIGH);
+  delay(ms);
 }
