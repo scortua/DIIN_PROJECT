@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="es">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vivero Don Honorio - Sistema de Monitoreo</title>
+    <style>
+        body {
+            font-family:'Arial Black', sans-serif;
+            background-color: #f0f8f0;
+            margin: 0;
+            padding: 0;
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><text x="10" y="50" font-size="40" opacity="0.5">🪴</text></svg>');
+            background-repeat: repeat;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #e0e0e0;
+            padding: 10px 15px;
+            border-radius: 10px 10px 0 0;
+        }
+
+        .header-title {
+            text-align: right;
+            flex-grow: 1;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 30px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #009688;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(30px);
+        }
+
+        .title-bar {
+            background-color: #009688;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            font-weight: bold;
+        }
+
+        .panel {
+            background-color: white;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .dashboard {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .chart-container {
+            width: 48%;
+            border: 1px solid #009688;
+            border-radius: 5px;
+            padding: 5px;
+        }
+
+        .data-container {
+            width: 48%;
+        }
+
+        .data-section {
+            background-color: #009688;
+            color: white;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            padding: 5px;
+        }
+
+        .data-section-title {
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 5px;
+        }
+
+        .data-line {
+            background-color: white;
+            margin: 5px 0;
+            border-radius: 3px;
+            padding: 5px;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .actions {
+            text-align: center;
+        }
+
+        .action-title {
+            background-color: #009688;
+            color: white;
+            padding: 8px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .action-button {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .circle-button {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            border: none;
+            margin-bottom: 5px;
+            cursor: pointer;
+        }
+
+        .circle-button.large {
+            width: 50px;
+            height: 50px;
+        }
+
+        .button-text {
+            background-color: #009688;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-size: 12px;
+        }
+
+        .footer-lines {
+            background-color: #e0e0e0;
+            height: 10px;
+            margin: 5px 0;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header section -->
+        <header>
+            <label class="switch">
+                <input type="checkbox">
+                <span class="slider"></span>
+            </label>
+            <div class="header-title">VIVERO DON HONORIO</div>
+        </header>
+
+        <!-- Main title -->
+        <div class="title-bar">DATOS DEL VIVERO</div>
+
+        <!-- Top panel - Dashboard -->
+        <div class="panel">
+            <div class="dashboard">
+                <!-- Chart section on the left -->
+                <div class="chart-container">
+                    <canvas id="dataChart" width="100%" height="100%" style="display: block; width: 100%; height: 100%;"></canvas>
+                </div>
+                
+                <!-- Data section on the right -->
+                <div class="data-container">
+                    <!-- Measurements section -->
+                    <div class="data-section">
+                        <div class="data-section-title">MEDIDAS</div>
+                        <div class="data-line" id="temperatura">Temperatura = 24°C</div>
+                        <div class="data-line" id="humedad">Humedad = 68%</div>
+                    </div>
+                    
+                    <!-- Statistics section -->
+                    <div class="data-section">
+                        <div class="data-section-title">ESTADÍSTICAS</div>
+                        <div class="data-line" id="tempStats" style="text-align: center; font-family: 'Arial Black', sans-serif; font-size: 18px;"><strong>Temperatura</strong></div>
+                        <div class="data-line" id="tempMaxStats" style="text-align: center;">📈Máx=27°C</div>
+                        <div class="data-line" id="tempMinStats" style="text-align: center;">📉Mín=10°C</div>
+                        <div class="data-line" id="tempAvgStats" style="text-align: center;">🌡️Prom=24.1°C</div>
+                        <div class="data-line" id="humStats" style="text-align: center; font-family: 'Verdana', sans-serif; font-size: 18px;"><strong>Humedad</strong></div>
+                        <div class="data-line" id="humMaxStats" style="text-align: center;">📈Máx=75%</div>
+                        <div class="data-line" id="humMinStats" style="text-align: center;">📉Mín=62%</div>
+                        <div class="data-line" id="humAvgStats" style="text-align: center;">💧Prom=68.1%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom panel - Actions -->
+        <div class="panel actions">
+            <div class="action-title">ACCIONES</div>
+            
+            <div class="action-buttons">
+                <!-- Yellow button -->
+                <div class="action-button">
+                    <button class="circle-button" style="background-color: yellow;"></button>
+                    <div class="button-text">TEMPERATURA</div>
+                </div>
+                
+                <!-- Blue button -->
+                <div class="action-button">
+                    <button class="circle-button" style="background-color: #00b0ff;"></button>
+                    <div class="button-text">HUMEDAD</div>
+                </div>
+                
+                <!-- Red button (larger) -->
+                <div class="action-button">
+                    <button class="circle-button large" style="background-color: red;"></button>
+                    <div class="button-text">DETENER</div>
+                </div>
+                
+                <!-- Orange button -->
+                <div class="action-button">
+                    <button class="circle-button" style="background-color: orange;"></button>
+                    <div class="button-text">CONEXION</div>
+                </div>
+                
+                <!-- Green button -->
+                <div class="action-button">
+                    <button class="circle-button" style="background-color: lime;"></button>
+                    <div class="button-text">CALIBRAR</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer with contact info -->
+        <div class="panel" style="background-color: #009688; color: white;"></div>
+            <div style="text-align: center; padding: 10px; font-size: 18px; font-weig</div>ht: bold;">
+            CONTACTO
+            </div>
+            <div style="display: flex; justify-content: space-around; flex-wrap: wrap;">
+            <div style="margin: 10px; text-align: center;">
+                <div style="font-weight: bold;">Desarrollado por:</div>
+                <div>Grupo Vivero Don Honorio</div>
+            </div>
+            <div style="margin: 10px; text-align: center;">
+                <div style="font-weight: bold;">Correo:</div>
+                <div>contacto@viverodonhonorio.com</div>
+            </div>
+            <div style="margin: 10px; text-align: center;">
+                <div style="font-weight: bold;">Teléfono:</div>
+                <div>+57 301 234 5678</div>
+            </div>
+            </div>
+            <div style="text-align: center; font-size: 14px; margin-top: 10px;">
+            © 2025 Vivero Don Honorio - Todos los derechos reservados
+            </div>
+        </div></div>
+    </div>
+
+    <script>
+        // Datos de muestra para el gráfico (10 temperaturas y 10 humedades)
+        const temperaturas = [22, 23, 25, 24, 22, 26, 27, 25, 24, 23];
+        const humedades = [65, 70, 68, 72, 75, 65, 62, 64, 68, 72];
+
+        // Make canvas responsive
+        function resizeCanvas() {
+            const canvas = document.getElementById('dataChart');
+            const container = canvas.parentElement;
+            canvas.width = container.clientWidth - 10;  // Subtract small padding
+            canvas.height = container.clientHeight - 10;
+        }
+        
+        // Resize canvas when window size changes
+        window.addEventListener('load', resizeCanvas);
+        window.addEventListener('resize', resizeCanvas);
+        
+        // Crear gráfico con Canvas
+        window.onload = function() {
+            const canvas = document.getElementById('dataChart');
+            const ctx = canvas.getContext('2d');
+            
+            // Configuración del gráfico
+            const width = canvas.width;
+            const height = canvas.height;
+            const padding = 10;
+            const maxDataValue = 100;
+            
+            // Dibujar marco
+            ctx.strokeStyle = '#009688';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(0, 0, width, height);
+            
+            // Dibujar líneas de temperatura (usando los 10 puntos)
+            ctx.beginPath();
+            ctx.strokeStyle = 'red';
+            ctx.lineWidth = 2;
+            
+            for (let i = 0; i < temperaturas.length; i++) {
+                const x = padding + i * ((width - padding * 2) / (temperaturas.length - 1));
+                // Escalar temperaturas al rango visible
+                const y = height - padding - ((temperaturas[i] - 20) / 10) * (height - padding * 2);
+                
+                if (i === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+            ctx.stroke();
+            
+            // Dibujar líneas de humedad (usando los 10 puntos)
+            ctx.beginPath();
+            ctx.strokeStyle = 'blue';
+            ctx.lineWidth = 2;
+            
+            for (let i = 0; i < humedades.length; i++) {
+                const x = padding + i * ((width - padding * 2) / (humedades.length - 1));
+                const y = height - padding - (humedades[i] / maxDataValue) * (height - padding * 2);
+                
+                if (i === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+            ctx.stroke();
+            
+            // Leyenda
+            ctx.font = '10px Arial';
+            ctx.fillStyle = 'red';
+            ctx.fillRect(padding, padding, 10, 5);
+            ctx.fillText('Temperatura', padding + 15, padding + 5);
+            
+            ctx.fillStyle = 'blue';
+            ctx.fillRect(padding + 80, padding, 10, 5);
+            ctx.fillText('Humedad', padding + 95, padding + 5);
+        };
+    </script>
+</body>
+</html>
