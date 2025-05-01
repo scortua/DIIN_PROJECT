@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vivero Don Honorio - Sistema de Monitoreo y Control</title>
+    <style>
+        body {
+            font-family:'Arial Black', sans-serif;
+            background-color: #f0f8f0;
+            margin: 0;
+            padding: 0;
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><text x="10" y="50" font-size="40" opacity="0.5">🪴</text></svg>');
+            background-repeat: repeat;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #e0e0e0;
+            padding: 10px 15px;
+            border-radius: 10px 10px 0 0;
+        }
+
+        .header-title {
+            text-align: right;
+            flex-grow: 1;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 30px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #009688;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(30px);
+        }
+
+        .title-bar {
+            background-color: #009688;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            font-weight: bold;
+        }
+
+        .panel {
+            background-color: white;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .dashboard {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .chart-container {
+            width: 48%;
+            border: 1px solid #009688;
+            border-radius: 5px;
+            padding: 5px;
+            position: relative;
+        }
+
+        .data-container {
+            width: 48%;
+        }
+
+        .data-section {
+            background-color: #009688;
+            color: white;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            padding: 5px;
+        }
+
+        .data-section-title {
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 5px;
+        }
+
+        .data-line {
+            background-color: white;
+            margin: 5px 0;
+            border-radius: 3px;
+            padding: 5px;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .actions {
+            text-align: center;
+        }
+
+        .action-title {
+            background-color: #009688;
+            color: white;
+            padding: 8px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+
+        .control-panel {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .axis-control {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border: 1px solid #009688;
+            padding: 10px;
+            border-radius: 10px;
+            width: 120px;
+        }
+
+        .axis-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #009688;
+        }
+
+        .axis-buttons {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .control-btn {
+            background-color: #009688;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            width: 45px;
+        }
+
+        .control-btn:hover {
+            background-color: #00796b;
+        }
+
+        .water-btn {
+            background-color: #00b0ff;
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            margin: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            width: 120px;
+            height: 80px;
+        }
+
+        .water-btn:hover {
+            background-color: #0091ea;
+        }
+
+        .footer-container {
+            background-color: #009688;
+            color: white;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .footer-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+        }
+
+        .footer-item {
+            margin: 10px;
+            text-align: center;
+        }
+
+        .footer-copyright {
+            font-size: 14px;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header section -->
+        <header>
+            <label class="switch">
+                <input type="checkbox">
+                <span class="slider"></span>
+            </label>
+            <div class="header-title">VIVERO DON HONORIO</div>
+        </header>
+
+        <!-- Main title -->
+        <div class="title-bar">DATOS DEL VIVERO</div>
+
+        <!-- Top panel - Dashboard -->
+        <div class="panel">
+            <div class="dashboard">
+                <!-- Chart section on the left -->
+                <div class="chart-container">
+                    <canvas id="dataChart" width="100%" height="100%" style="display: block; width: 100%; height: 100%;"></canvas>
+                </div>
+                
+                <!-- Data section on the right -->
+                <div class="data-container">
+                    <!-- Measurements section -->
+                    <div class="data-section">
+                        <div class="data-section-title">MEDIDAS</div>
+                        <div class="data-line" id="temp0">Temperatura = -- °C</div>
+                        <div class="data-line" id="hum0">Humedad = -- %</div>
+                    </div>
+                    
+                    <!-- Statistics section -->
+                    <div class="data-section">
+                        <div class="data-section-title">ESTADÍSTICAS</div>
+                        <div class="data-line" id="tempStats" style="text-align: center; font-family: 'Arial Black', sans-serif; font-size: 18px;"><strong>Temperatura</strong></div>
+                        <div class="data-line" id="tempMaxStats" style="text-align: center;">📈Máx= <span id="tmax">--</span> °C</div>
+                        <div class="data-line" id="tempMinStats" style="text-align: center;">📉Mín= <span id="tmin">--</span> °C</div>
+                        <div class="data-line" id="tempAvgStats" style="text-align: center;">🌡️Prom= <span id="tavg">--</span> °C</div>
+                        <div class="data-line" id="humStats" style="text-align: center; font-family: 'Verdana', sans-serif; font-size: 18px;"><strong>Humedad</strong></div>
+                        <div class="data-line" id="humMaxStats" style="text-align: center;">📈Máx= <span id="hmax">--</span> %</div>
+                        <div class="data-line" id="humMinStats" style="text-align: center;">📉Mín= <span id="hmin">--</span> %</div>
+                        <div class="data-line" id="humAvgStats" style="text-align: center;">💧Prom= <span id="havg">--</span> %</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom panel - Controls -->
+        <div class="panel actions">
+            <div class="action-title">CONTROLES</div>
+            
+            <div class="control-panel">
+                <!-- X Axis Control -->
+                <div class="axis-control">
+                    <div class="axis-title">Eje X</div>
+                    <div class="axis-buttons">
+                        <button class="control-btn" id="x-back">◀</button>
+                        <button class="control-btn" id="x-forward">▶</button>
+                    </div>
+                </div>
+                
+                <!-- Y Axis Control -->
+                <div class="axis-control">
+                    <div class="axis-title">Eje Y</div>
+                    <div class="axis-buttons">
+                        <button class="control-btn" id="y-back">◀</button>
+                        <button class="control-btn" id="y-forward">▶</button>
+                    </div>
+                </div>
+                
+                <!-- Z Axis Control -->
+                <div class="axis-control">
+                    <div class="axis-title">Eje Z</div>
+                    <div class="axis-buttons">
+                        <button class="control-btn" id="z-back">◀</button>
+                        <button class="control-btn" id="z-forward">▶</button>
+                    </div>
+                </div>
+                
+                <!-- Water Button -->
+                <div>
+                    <button class="water-btn" id="water-btn">
+                        💧<br>REGAR
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer with contact info -->
+        <div class="footer-container">
+            <div class="footer-title">CONTACTO</div>
+            <div class="footer-content">
+                <div class="footer-item">
+                    <div style="font-weight: bold;">Desarrollado por:</div>
+                    <div>Grupo Vivero Don Honorio</div>
+                </div>
+                <div class="footer-item">
+                    <div style="font-weight: bold;">Correo:</div>
+                    <div>contacto@viverodonhonorio.com</div>
+                </div>
+                <div class="footer-item">
+                    <div style="font-weight: bold;">Teléfono:</div>
+                    <div>+57 301 234 5678</div>
+                </div>
+            </div>
+            <div class="footer-copyright">
+                © 2025 Vivero Don Honorio - Todos los derechos reservados
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variables para almacenar los datos
+        let temperaturas = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        let humedades = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        
+        // Función para actualizar los datos desde el servidor
+        function actualizarDatos() {
+            fetch('/stats')
+                .then(res => res.json())
+                .then(data => {
+                    // Actualizar datos de temperatura y humedad
+                    document.getElementById("temp0").innerText = "Temperatura = " + data.t0 + " °C";
+                    document.getElementById("hum0").innerText = "Humedad = " + data.h0 + " %";
+                    
+                    // Guardar valores para el gráfico
+                    temperaturas = [
+                        parseFloat(data.t0), parseFloat(data.t1), parseFloat(data.t2), 
+                        parseFloat(data.t3), parseFloat(data.t4), parseFloat(data.t5), 
+                        parseFloat(data.t6), parseFloat(data.t7), parseFloat(data.t8), 
+                        parseFloat(data.t9)
+                    ];
+                    
+                    humedades = [
+                        parseFloat(data.h0), parseFloat(data.h1), parseFloat(data.h2), 
+                        parseFloat(data.h3), parseFloat(data.h4), parseFloat(data.h5), 
+                        parseFloat(data.h6), parseFloat(data.h7), parseFloat(data.h8), 
+                        parseFloat(data.h9)
+                    ];
+                    
+                    // Actualizar estadísticas
+                    document.getElementById("tmax").innerText = data.tmax;
+                    document.getElementById("tmin").innerText = data.tmin;
+                    document.getElementById("tavg").innerText = data.tavg;
+                    document.getElementById("hmax").innerText = data.hmax;
+                    document.getElementById("hmin").innerText = data.hmin;
+                    document.getElementById("havg").innerText = data.havg;
+                    
+                    // Redibujar gráfico
+                    dibujarGrafico();
+                })
+                .catch(err => {
+                    console.error("Error al obtener datos:", err);
+                });
+        }
+        
+        // Función para hacer que el canvas sea responsive
+        function resizeCanvas() {
+            const canvas = document.getElementById('dataChart');
+            const container = canvas.parentElement;
+            canvas.width = container.clientWidth - 10;  // Restar un pequeño padding
+            canvas.height = container.clientHeight - 10;
+            dibujarGrafico();
+        }
+        
+        // Función para dibujar el gráfico
+        function dibujarGrafico() {
+            const canvas = document.getElementById('dataChart');
+            const ctx = canvas.getContext('2d');
+            
+            // Limpiar canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Configuración del gráfico
+            const width = canvas.width;
+            const height = canvas.height;
+            const padding = 10;
+            const maxDataValue = 100;
+            
+            // Dibujar marco
+            ctx.strokeStyle = '#009688';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(0, 0, width, height);
+            
+            // Dibujar líneas de temperatura
+            ctx.beginPath();
+            ctx.strokeStyle = 'red';
+            ctx.lineWidth = 2;
+            
+            for (let i = 0; i < temperaturas.length; i++) {
+                const x = padding + i * ((width - padding * 2) / (temperaturas.length - 1));
+                // Escalar temperaturas al rango visible
+                const y = height - padding - ((temperaturas[i] - 10) / 30) * (height - padding * 2);
+                
+                if (i === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+            ctx.stroke();
+            
+            // Dibujar líneas de humedad
+            ctx.beginPath();
+            ctx.strokeStyle = 'blue';
+            ctx.lineWidth = 2;
+            
+            for (let i = 0; i < humedades.length; i++) {
+                const x = padding + i * ((width - padding * 2) / (humedades.length - 1));
+                const y = height - padding - (humedades[i] / maxDataValue) * (height - padding * 2);
+                
+                if (i === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+            ctx.stroke();
+            
+            // Leyenda
+            ctx.font = '10px Arial';
+            ctx.fillStyle = 'red';
+            ctx.fillRect(padding, padding, 10, 5);
+            ctx.fillText('Temperatura', padding + 15, padding + 5);
+            
+            ctx.fillStyle = 'blue';
+            ctx.fillRect(padding + 80, padding, 10, 5);
+            ctx.fillText('Humedad', padding + 95, padding + 5);
+        }
+        
+        // Manejadores de eventos para los botones de control
+        document.getElementById('x-forward').addEventListener('click', function() {
+            fetch('/control', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ axis: 'x', direction: 'forward' })
+            });
+        });
+        
+        document.getElementById('x-back').addEventListener('click', function() {
+            fetch('/control', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ axis: 'x', direction: 'back' })
+            });
+        });
+        
+        document.getElementById('y-forward').addEventListener('click', function() {
+            fetch('/control', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ axis: 'y', direction: 'forward' })
+            });
+        });
+        
+        document.getElementById('y-back').addEventListener('click', function() {
+            fetch('/control', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ axis: 'y', direction: 'back' })
+            });
+        });
+        
+        document.getElementById('z-forward').addEventListener('click', function() {
+            fetch('/control', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ axis: 'z', direction: 'forward' })
+            });
+        });
+        
+        document.getElementById('z-back').addEventListener('click', function() {
+            fetch('/control', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ axis: 'z', direction: 'back' })
+            });
+        });
+        
+        document.getElementById('water-btn').addEventListener('click', function() {
+            fetch('/control', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ action: 'water' })
+            });
+        });
+        
+        // Actualizar datos cada 2 segundos
+        setInterval(actualizarDatos, 2000);
+        
+        // Ajustar tamaño del canvas al cargar y redimensionar la ventana
+        window.addEventListener('load', function() {
+            resizeCanvas();
+            actualizarDatos();
+        });
+        window.addEventListener('resize', resizeCanvas);
+    </script>
+</body>
+</html>
