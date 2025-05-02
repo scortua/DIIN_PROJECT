@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VIVERO DON HONORIO</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+    
+    body {
+      background-color: #f5f5f5;
+      background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><text x="10" y="50" font-size="40" opacity="0.5">🪴</text></svg>');
+      background-repeat: repeat;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    
+    .container {
+      width: 100%;
+      max-width: 800px;
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+      padding: 10px;
+    }
+    
+    .header {
+      text-align: center;
+      padding: 10px;
+      background-color: #f5f5f5;
+      border-radius: 5px;
+      margin-bottom: 10px;
+    }
+    
+    .header h1 {
+      color: #333;
+      font-size: 24px;
+    }
+    
+    .section-title {
+      background-color: #009688;
+      color: white;
+      text-align: center;
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 5px;
+      font-weight: bold;
+    }
+    
+    .data-container {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 15px;
+    }
+    
+    .chart-container {
+      flex: 1;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      padding: 10px;
+      margin-right: 10px;
+      min-height: 300px;
+    }
+    
+    .measures-container {
+      width: 40%;
+    }
+    
+    .measure-box {
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+    
+    .measure-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .measure-item:last-child {
+      border-bottom: none;
+    }
+    
+    .measure-value {
+      font-weight: bold;
+      color: #009688;
+    }
+    
+    .stats-title {
+      background-color: #009688;
+      color: white;
+      text-align: center;
+      padding: 8px;
+      margin-top: 5px;
+      border-radius: 5px;
+    }
+    
+    .stats-container {
+      margin-top: 10px;
+    }
+    
+    .control-container {
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+      margin-top: 15px;
+    }
+    
+    .control-box {
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      padding: 10px;
+      margin: 5px;
+      text-align: center;
+      width: 150px;
+    }
+    
+    .control-title {
+      margin-bottom: 10px;
+      color: #009688;
+      font-weight: bold;
+    }
+    
+    .button-container {
+      display: flex;
+      justify-content: space-between;
+    }
+    
+    .button {
+      display: inline-block;
+      width: 40px;
+      height: 40px;
+      border-radius: 5px;
+      color: white;
+      text-align: center;
+      line-height: 40px;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 20px;
+    }
+    
+    .button-on {
+      background-color: #4CAF50;
+    }
+    
+    .button-off {
+      background-color: #f44336;
+    }
+    
+    .regar-button {
+      background-color: #2196F3;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 15px 30px;
+      font-size: 16px;
+      cursor: pointer;
+      margin: 10px;
+      transition: background-color 0.3s;
+    }
+    
+    .regar-button:hover {
+      background-color: #0b7dda;
+    }
+    
+    .footer {
+      background-color: #009688;
+      color: white;
+      text-align: center;
+      padding: 15px;
+      border-radius: 5px;
+      margin-top: 20px;
+      width: 100%;
+    }
+    
+    .footer-content {
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+    
+    .footer-item {
+      margin: 5px 0;
+    }
+    
+    .copyright {
+      font-size: 12px;
+      margin-top: 10px;
+    }
+    
+    @media (max-width: 768px) {
+      .data-container {
+        flex-direction: column;
+      }
+      
+      .chart-container {
+        margin-right: 0;
+        margin-bottom: 10px;
+      }
+      
+      .measures-container {
+        width: 100%;
+      }
+      
+      .control-box {
+        width: 45%;
+      }
+    }
+
+    /* Botones de control */
+    .control-btn {
+        display: inline-block;
+        width: 40px;
+        height: 40px;
+        border-radius: 5px;
+        color: white;
+        text-align: center;
+        line-height: 40px;
+        text-decoration: none;
+        font-weight: bold;
+        font-size: 20px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    .control-btn-on {
+        background-color: #4CAF50; /* Verde para botones activos */
+    }
+
+    .control-btn-off {
+        background-color: #f44336; /* Rojo para botones inactivos */
+    }
+
+    .control-btn:hover {
+        opacity: 0.8;
+    }
+
+    .water-btn {
+        background-color: #2196F3;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        padding: 15px 30px;
+        font-size: 16px;
+        cursor: pointer;
+        margin: 10px;
+        transition: background-color 0.3s;
+    }
+
+    .water-btn:hover {
+        background-color: #0b7dda;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>VIVERO DON HONORIO</h1>
+    </div>
+    
+    <div class="section-title">DATOS DEL VIVERO</div>
+    
+    <div class="data-container">
+      <div class="chart-container" id="chartContainer">
+        <!-- Aquí se insertará la gráfica -->
+        <canvas id="dataChart"></canvas>
+      </div>
+      
+      <div class="measures-container">
+        <div class="measure-box">
+          <div class="stats-title">MEDIDAS</div>
+          <div class="measure-item">
+            <span>Temperatura:</span>
+            <span class="measure-value" id="temperature">-- °C</span>
+          </div>
+          <div class="measure-item">
+            <span>Humedad:</span>
+            <span class="measure-value" id="humidity">-- %</span>
+          </div>
+        </div>
+        
+        <div class="stats-container">
+          <div class="stats-title">ESTADÍSTICAS</div>
+          <div class="measure-box">
+            <div class="stats-title">Temperatura</div>
+            <div class="measure-item">
+              <span>🌡️ Max:</span>
+              <span class="measure-value" id="tempMax">-- °C</span>
+            </div>
+            <div class="measure-item">
+              <span>❄️ Min:</span>
+              <span class="measure-value" id="tempMin">-- °C</span>
+            </div>
+            <div class="measure-item">
+              <span>📊 Prom:</span>
+              <span class="measure-value" id="tempAvg">-- °C</span>
+            </div>
+          </div>
+          
+          <div class="measure-box">
+            <div class="stats-title">Humedad</div>
+            <div class="measure-item">
+              <span>💧 Max:</span>
+              <span class="measure-value" id="humMax">-- %</span>
+            </div>
+            <div class="measure-item">
+              <span>🏜️ Min:</span>
+              <span class="measure-value" id="humMin">-- %</span>
+            </div>
+            <div class="measure-item">
+              <span>📊 Prom:</span>
+              <span class="measure-value" id="humAvg">-- %</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="container">
+    <div class="section-title">CONTROLES</div>
+    
+    <div class="control-container">
+      <div class="control-box">
+        <div class="control-title">Eje X</div>
+        <div class="button-container">
+          <a href="/stepmotorx/backward" class="button button-on" id="x-backward">◀</a>
+          <a href="/stepmotorx/forward" class="button button-on" id="x-forward">▶</a>
+        </div>
+      </div>
+      
+      <div class="control-box">
+        <div class="control-title">Eje Y</div>
+        <div class="button-container">
+          <a href="/stepmotorbackward" class="button button-on" id="y-backward">◀</a>
+          <a href="/stepmotorforward" class="button button-on" id="y-forward">▶</a>
+        </div>
+      </div>
+      
+      <div class="control-box">
+        <div class="control-title">Eje Z</div>
+        <div class="button-container">
+          <a href="/stepmotorz/backward" class="button button-on" id="z-backward">◀</a>
+          <a href="/stepmotorz/forward" class="button button-on" id="z-forward">▶</a>
+        </div>
+      </div>
+      
+      <button class="regar-button" id="regar-btn">REGAR</button>
+    </div>
+  </div>
+  
+  <div class="container">
+    <div class="footer">
+      <div class="footer-content">
+        <div class="footer-item">
+          <strong>Desarrollado por:</strong><br>
+          Grupo Vivero Don Honorio
+        </div>
+        <div class="footer-item">
+          <strong>Correo:</strong><br>
+          contacto@viverodonhonorio.com
+        </div>
+        <div class="footer-item">
+          <strong>Teléfono:</strong><br>
+          +57 301 234 5678
+        </div>
+      </div>
+      <div class="copyright">
+        © 2025 Vivero Don Honorio - Todos los derechos reservados
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+  <script>
+    // Arrays de temperaturas y humedades (10 elementos iniciales)
+    let temperaturas = [22, 23, 22.5, 23.5, 24, 23, 22, 21.5, 22, 23];
+    let humedades = [65, 67, 68, 70, 72, 69, 67, 65, 66, 68];
+    
+    // Crear etiquetas de tiempo para los datos iniciales
+    let timeLabels = [];
+    for (let i = 9; i >= 0; i--) {
+      const d = new Date();
+      d.setMinutes(d.getMinutes() - i);
+      timeLabels.push(d.getHours() + ':' + d.getMinutes() + ':' + d.getSeconds());
+    }
+
+    // Inicialización de la gráfica
+    const ctx = document.getElementById('dataChart').getContext('2d');
+    const dataChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: timeLabels,
+        datasets: [
+          {
+            label: 'Temperatura',
+            data: temperaturas,
+            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+            borderColor: 'rgba(255, 99, 132, 1)',
+            borderWidth: 1,
+            tension: 0.1
+          },
+          {
+            label: 'Humedad',
+            data: humedades,
+            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1,
+            tension: 0.1
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: true
+          }
+        }
+      }
+    });
+
+    // Función para actualizar los datos
+    function updateData() {
+      fetch('/datos')
+        .then(response => response.json())
+        .then(data => {
+          // Actualizar valores actuales
+          document.getElementById('temperature').textContent = data.temperatura + ' °C';
+          document.getElementById('humidity').textContent = data.humedad + ' %';
+          
+          // Actualizar estadísticas
+          document.getElementById('tempMax').textContent = data.tempMax + ' °C';
+          document.getElementById('tempMin').textContent = data.tempMin + ' °C';
+          document.getElementById('tempAvg').textContent = data.tempAvg + ' °C';
+          document.getElementById('humMax').textContent = data.humMax + ' %';
+          document.getElementById('humMin').textContent = data.humMin + ' %';
+          document.getElementById('humAvg').textContent = data.humAvg + ' %';
+          
+          // Actualizar arrays y gráfica
+          temperaturas.push(data.temperatura);
+          humedades.push(data.humedad);
+          
+          // Mantener solo los últimos 10 elementos
+          if (temperaturas.length > 10) {
+            temperaturas.shift();
+            humedades.shift();
+            dataChart.data.labels.shift();
+          }
+          
+          const now = new Date();
+          const timeStr = now.getHours() + ':' + now.getMinutes() + ':' + now.getSeconds();
+          
+          dataChart.data.labels.push(timeStr);
+          dataChart.data.datasets[0].data = [...temperaturas];
+          dataChart.data.datasets[1].data = [...humedades];
+          dataChart.update();
+          
+          // Actualizar estado de botones según la respuesta
+          updateButtonStates(data);
+        })
+        .catch(error => {
+          console.error('Error al obtener datos:', error);
+        });
+    }
+    
+    // Función para actualizar el estado de los botones
+    function updateButtonStates(data) {
+      // Actualizar botones X
+      if (data.x_state === "forward") {
+        document.getElementById('x-forward').className = "button button-off";
+        document.getElementById('x-forward').href = "/stepmotor/x/stop";
+        document.getElementById('x-backward').className = "button button-on";
+        document.getElementById('x-backward').href = "/stepmotor/x/backward";
+      } else if (data.x_state === "backward") {
+        document.getElementById('x-backward').className = "button button-off";
+        document.getElementById('x-backward').href = "/stepmotor/x/stop";
+        document.getElementById('x-forward').className = "button button-on";
+        document.getElementById('x-forward').href = "/stepmotor/x/forward";
+      } else {
+        document.getElementById('x-forward').className = "button button-on";
+        document.getElementById('x-forward').href = "/stepmotor/x/forward";
+        document.getElementById('x-backward').className = "button button-on";
+        document.getElementById('x-backward').href = "/stepmotor/x/backward";
+      }
+      
+      // Actualizar botones Y
+      if (data.y_state === "forward") {
+        document.getElementById('y-forward').className = "button button-off";
+        document.getElementById('y-forward').href = "/stepmotor/y/stop";
+        document.getElementById('y-backward').className = "button button-on";
+        document.getElementById('y-backward').href = "/stepmotor/y/backward";
+      } else if (data.y_state === "backward") {
+        document.getElementById('y-backward').className = "button button-off";
+        document.getElementById('y-backward').href = "/stepmotor/y/stop";
+        document.getElementById('y-forward').className = "button button-on";
+        document.getElementById('y-forward').href = "/stepmotor/y/forward";
+      } else {
+        document.getElementById('y-forward').className = "button button-on";
+        document.getElementById('y-forward').href = "/stepmotor/y/forward";
+        document.getElementById('y-backward').className = "button button-on";
+        document.getElementById('y-backward').href = "/stepmotor/y/backward";
+      }
+      
+      // Actualizar botones Z
+      if (data.z_state === "forward") {
+        document.getElementById('z-forward').className = "button button-off";
+        document.getElementById('z-forward').href = "/stepmotor/z/stop";
+        document.getElementById('z-backward').className = "button button-on";
+        document.getElementById('z-backward').href = "/stepmotor/z/backward";
+      } else if (data.z_state === "backward") {
+        document.getElementById('z-backward').className = "button button-off";
+        document.getElementById('z-backward').href = "/stepmotor/z/stop";
+        document.getElementById('z-forward').className = "button button-on";
+        document.getElementById('z-forward').href = "/stepmotor/z/forward";
+      } else {
+        document.getElementById('z-forward').className = "button button-on";
+        document.getElementById('z-forward').href = "/stepmotor/z/forward";
+        document.getElementById('z-backward').className = "button button-on";
+        document.getElementById('z-backward').href = "/stepmotor/z/backward";
+      }
+    }
+    
+    // Botón de regar
+    document.getElementById('regar-btn').addEventListener('click', function() {
+      fetch('/regar')
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            alert('¡Riego activado con éxito!');
+          } else {
+            alert('Error al activar el riego: ' + data.message);
+          }
+        })
+        .catch(error => {
+          console.error('Error al activar riego:', error);
+          alert('Error al comunicarse con el sistema de riego');
+        });
+    });
+    
+    // Actualizar datos cada 5 segundos
+    updateData();
+    setInterval(updateData, 5000);
+  </script>
+</body>
+</html>
