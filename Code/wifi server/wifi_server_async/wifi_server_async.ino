@@ -18,22 +18,22 @@ float tempHistory[10] = {10,20,30,22,25,20,30,14,14,12}; // Array to store tempe
 float humHistory[10] = {50,30,70,80,50,30,70,80,20,50}; // Array to store humidity history
 float maxtemp = 0, mintemp = 100, maxhum = 0, minhum = 100, avgTemp = 0, avgHum = 0; // Variables to store max and min values
 
-#define in1 16 // Pin for the coil1
-#define in2 17 // Pin for the coil2
-#define in3 5 // Pin for the coil3
-#define in4 18 // Pin for the coil4
+#define in1 15 // Pin for the coil1
+#define in2 2 // Pin for the coil2
+#define in3 4 // Pin for the coil3
+#define in4 16 // Pin for the coil4
 String step_state = "stop"; // Variable to store the stepper motor state
-int ms_step = 100; // Delay between steps in milliseconds
+int ms_step = 2.5; // Delay between steps in milliseconds
 
-#define m1 19 // Pin for the motor1
-#define m11 21 // Pin for the motor1
+#define m1 22 // Pin for the motor1
+#define m11 23 // Pin for the motor1
 String motorX_state = "stop"; // Variable to store the motorX state
 
-#define m2 3 // Pin for the motor2
-#define m22 1 // Pin for the motor2
+#define m2 18 // Pin for the motor2
+#define m22 19 // Pin for the motor2
 String motorY_state = "stop"; // Variable to store the motorY state
 
-#define pump 2
+#define pump 13
 String pump_state = "stop"; // Variable to store the pump state
 
 void pines();

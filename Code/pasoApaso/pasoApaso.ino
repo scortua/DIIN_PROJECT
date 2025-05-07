@@ -1,8 +1,8 @@
 
-#define pin1 10
-#define pin2 11
-#define pin3 12 
-#define pin4 13
+#define pin1 25
+#define pin2 26
+#define pin3 27 
+#define pin4 14
 #define ms 2.5 // 5 10 15
 
 void setup() {
@@ -16,9 +16,9 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
   //unoAuno();
-  //dosAdos();
+  dosAdos();
   //tresAtres();
-  unoAunoplus();
+  //unoAunoplus();
 }
 
 void unoAuno()
