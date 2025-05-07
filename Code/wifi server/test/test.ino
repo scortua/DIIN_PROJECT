@@ -1,47 +1,26 @@
 #include <WiFi.h>
 #include <WebServer.h>
-#include <DHT.h>
 
-const char* ssid = "VIVERO DON HONORIO"; // Replace with your network SSID
-const char* password = "1234567890"; // Replace with your network password
+// Configuración de la red WiFi
+const char* ssid = "VIVERO DON HONORIO";
+const char* password = "1234567890";
 
-IPAddress local_IP(192, 168, 1, 1); // Set a static IP address
-IPAddress gateway(192, 168, 1, 1); // Set the gateway IP address
-IPAddress subnet(255, 255, 255, 0); // Set the subnet mask
+IPAddress local_IP(192, 168, 1, 1);
+IPAddress gateway(192, 168, 1, 1);
+IPAddress subnet(255, 255, 255, 0);
 
-WebServer server(80); // Create a web server object that listens for HTTP requests on port 80
+WebServer server(80);
 
-#define DHTPIN 23 // Pin where the DHT22 is connected
-#define DHTTYPE DHT22 // Define the type of DHT sensor
-DHT dht(DHTPIN, DHTTYPE); // Create a DHT object
-float tempHistory[10] = {10,20,30,22,25,20,30,14,14,12}; // Array to store temperature history
-float humHistory[10] = {50,30,70,80,50,30,70,80,20,50}; // Array to store humidity history
-float maxtemp = 0, mintemp = 100, maxhum = 0, minhum = 100, avgTemp = 0, avgHum = 0; // Variables to store max and min values
+// Variables para datos aleatorios
+float tempHistory[10] = {0};
+float humHistory[10] = {0};
+float maxtemp = 0, mintemp = 100, maxhum = 0, minhum = 100, avgTemp = 0, avgHum = 0;
+String pump_state = "stop"; // Estado de la bomba de agua
+String step_state = "stop"; // Estado del motor de paso
+String motorX_state = "stop"; // Estado del motor X
+String motorY_state = "stop"; // Estado del motor Y
 
-#define in1 15 // Pin for the coil1
-#define in2 2 // Pin for the coil2
-#define in3 4 // Pin for the coil3
-#define in4 16 // Pin for the coil4
-String step_state = "stop"; // Variable to store the stepper motor state
-int ms_step = 2.5; // Delay between steps in milliseconds
-
-#define m1 22 // Pin for the motor1
-#define m11 23 // Pin for the motor1
-String motorX_state = "stop"; // Variable to store the motorX state
-
-#define m2 18 // Pin for the motor2
-#define m22 19 // Pin for the motor2
-String motorY_state = "stop"; // Variable to store the motorY state
-
-#define pump 13
-String pump_state = "stop"; // Variable to store the pump state
-
-void pines();
-void detener_step();
-void detener_m1();
-void detener_m2();
-void step(int , int , int , int );
-void motorDC(int, int);
+// Prototipos de funciones
 void variables();
 void handle_OnConnect();
 void handle_stepmotor_stop();
@@ -57,218 +36,128 @@ void handle_ia();
 void handle_NotFound();
 String sendHTML();
 
-void setup(){
-  // Connect to Wi-Fi
+void setup() {
+  Serial.begin(115200);
+
+  // Configuración de la red WiFi
   WiFi.softAP(ssid, password);
   WiFi.softAPConfig(local_IP, gateway, subnet);
   delay(100);
-  dht.begin(); // Initialize the DHT sensor
-  // Configurar pines
-  pines();
-  detener_step();
-  detener_m1();
-  detener_m2();
-  // server on
+  Serial.println("WiFi iniciado");
+  Serial.print("IP del AP: ");
+  Serial.println(WiFi.softAPIP());
+
+  // Configuración del servidor web
   server.on("/", handle_OnConnect);
-  // server on stepper motor
   server.on("/stepmotor/stop", handle_stepmotor_stop);
   server.on("/stepmotor/forward", handle_stepmotor_forward);
   server.on("/stepmotor/backward", handle_stepmotor_backward);
-  // server on motorX
   server.on("/motorX/stop", handle_motorX_stop);
   server.on("/motorX/forward", handle_motorX_forward);
   server.on("/motorX/backward", handle_motorX_backward);
-  // server on motorY
   server.on("/motorY/stop", handle_motorY_stop);
   server.on("/motorY/forward", handle_motorY_forward);
   server.on("/motorY/backward", handle_motorY_backward);
-  // server on IA
   server.on("/ia", handle_ia);
-  // server on not found
   server.onNotFound(handle_NotFound);
   server.begin();
-  Serial.println("HTTP server started");  
+  Serial.println("Servidor HTTP iniciado");
 }
 
-void loop(){
-  server.handleClient(); // Handle incoming client requests
-  variables(); // Read DHT sensor data
-  if (step_state == "forward") {
-    step(in1, in2, in3, in4);
-  } else if (step_state == "backward") {
-    step(in4, in3, in2, in1);
-  } else if (step_state == "stop") {
-    detener_step();
-  } 
-  if (motorX_state == "forward") {
-    motorDC(m1, m11);
-  } else if (motorX_state == "backward") {
-    motorDC(m11, m1);
-  } else if (motorX_state == "stop") {
-    detener_m1();
-  }
-  if (motorY_state == "forward") {
-    motorDC(m2, m22);
-  } else if (motorY_state == "backward") {
-    motorDC(m22, m2);
-  } else if (motorY_state == "stop") {
-    detener_m2();
-  }
-  if (pump_state == "go") {
-    digitalWrite(pump, HIGH);
-  } else if (pump_state == "stop") {
-    digitalWrite(pump, LOW);
-  }
-  delay(10); // Delay to prevent excessive CPU usage
+void loop() {
+  server.handleClient();
+  variables();
 }
-/*-------------------------Funciones de manejo de pines------------------------- */
-void pines() {
-  // Configurar pines para el motor de paso
-  pinMode(in1, OUTPUT);
-  pinMode(in2, OUTPUT);
-  pinMode(in3, OUTPUT);
-  pinMode(in4, OUTPUT);
-  // Configurar pines para el motor DC X
-  pinMode(m1, OUTPUT);
-  pinMode(m11, OUTPUT);
-  // Configurar pines para el motor DC Y
-  pinMode(m2, OUTPUT);
-  pinMode(m22, OUTPUT);
-  // Configurar pump
-  pinMode(pump, OUTPUT);
-}
-/*-------------------------Funciones de manejo de motores------------------------- */
-void detener_step() {
-  digitalWrite(in1, LOW);
-  digitalWrite(in2, LOW);
-  digitalWrite(in3, LOW);
-  digitalWrite(in4, LOW);
-}
-void detener_m1() {
-  digitalWrite(m1, LOW);
-  digitalWrite(m11, LOW);
-}
-void detener_m2() {
-  digitalWrite(m2, LOW);
-  digitalWrite(m22, LOW);
-}
-/*-------------------------Funciones de manejo de motores------------------------- */
-void step(int pin1, int pin2, int pin3, int pin4) {
-  digitalWrite(pin1, HIGH);
-  digitalWrite(pin2, HIGH);
-  digitalWrite(pin3, LOW);
-  digitalWrite(pin4, LOW);
-  delay(ms_step);
-  digitalWrite(pin1, LOW);
-  digitalWrite(pin2, HIGH);
-  digitalWrite(pin3, HIGH);
-  digitalWrite(pin4, LOW);
-  delay(ms_step);
-  digitalWrite(pin1, LOW);
-  digitalWrite(pin2, LOW);
-  digitalWrite(pin3, HIGH);
-  digitalWrite(pin4, HIGH);
-  delay(ms_step);
-  digitalWrite(pin1, HIGH);
-  digitalWrite(pin2, LOW);
-  digitalWrite(pin3, LOW);
-  digitalWrite(pin4, HIGH);
-  delay(ms_step);
-}
-/*-------------------------Funciones de manejo de motores------------------------- */
-void motorDC(int pin1, int pin2) {
-  digitalWrite(pin1, HIGH);
-  digitalWrite(pin2, LOW);
-}
-/*-------------------------Funciones de manejo de variables------------------------- */
+
+// Función para generar datos aleatorios
 void variables() {
-  // Read temperature and humidity from DHT sensor
-  //float h = dht.readHumidity();
-  //float t = dht.readTemperature();
-  float h = random(80, 85); // Simulated humidity
-  float t = random(11, 17); // Simulated temperature
-  // Store the readings in history arrays
+  float h = random(30, 80); // Humedad simulada
+  float t = random(5, 30);  // Temperatura simulada
+
+  // Actualizar los datos históricos
   for (int i = 9; i > 0; i--) {
     tempHistory[i] = tempHistory[i - 1];
     humHistory[i] = humHistory[i - 1];
   }
   tempHistory[0] = t;
   humHistory[0] = h;
-  for (int i=0; i<10; i++){
-    if (tempHistory[i] > maxtemp) {
-      maxtemp = tempHistory[i];
-    }
-    if (tempHistory[i] < mintemp) {
-      mintemp = tempHistory[i];
-    }
-    if (humHistory[i] > maxhum) {
-      maxhum = humHistory[i];
-    }
-    if (humHistory[i] < minhum) {
-      minhum = humHistory[i];
-    }
+
+  // Calcular estadísticas
+  maxtemp = mintemp = tempHistory[0];
+  maxhum = minhum = humHistory[0];
+  avgTemp = avgHum = 0;
+  for (int i = 0; i < 10; i++) {
+    if (tempHistory[i] > maxtemp) maxtemp = tempHistory[i];
+    if (tempHistory[i] < mintemp) mintemp = tempHistory[i];
+    if (humHistory[i] > maxhum) maxhum = humHistory[i];
+    if (humHistory[i] < minhum) minhum = humHistory[i];
+    avgTemp += tempHistory[i];
+    avgHum += humHistory[i];
   }
-  avgTemp = (tempHistory[0] + tempHistory[1] + tempHistory[2] + tempHistory[3] + tempHistory[4] + tempHistory[5] + tempHistory[6] + tempHistory[7] + tempHistory[8] + tempHistory[9]) / 10;
-  avgHum = (humHistory[0] + humHistory[1] + humHistory[2] + humHistory[3] + humHistory[4] + humHistory[5] + humHistory[6] + humHistory[7] + humHistory[8] + humHistory[9]) / 10;
+  avgTemp /= 10;
+  avgHum /= 10;
 }
-/*-------------------------Funciones de manejo de peticiones------------------------- */
-void handle_OnConnect(){
+
+// Funciones de manejo de peticiones
+void handle_OnConnect() {
   server.send(200, "text/html", sendHTML());
 }
-/* ------------------------Motor de paso------------------------- */
-void handle_stepmotor_stop(){
-  step_state = "stop";
+
+void handle_stepmotor_stop() {
+  Serial.println("Motor de paso: Detener");
   server.send(200, "text/html", sendHTML());
 }
-void handle_stepmotor_forward(){
-  step_state = "forward";
+
+void handle_stepmotor_forward() {
+  Serial.println("Motor de paso: Adelante");
   server.send(200, "text/html", sendHTML());
 }
-void handle_stepmotor_backward(){
-  step_state = "backward";
+
+void handle_stepmotor_backward() {
+  Serial.println("Motor de paso: Atrás");
   server.send(200, "text/html", sendHTML());
 }
-/*-------------------------Motor dc x------------------------- */
-void handle_motorX_stop(){
-  motorX_state = "stop";
+
+void handle_motorX_stop() {
+  Serial.println("Motor X: Detener");
   server.send(200, "text/html", sendHTML());
 }
-void handle_motorX_forward(){
-  motorX_state = "forward";
+
+void handle_motorX_forward() {
+  Serial.println("Motor X: Adelante");
   server.send(200, "text/html", sendHTML());
 }
-void handle_motorX_backward(){
-  motorX_state = "backward";
+
+void handle_motorX_backward() {
+  Serial.println("Motor X: Atrás");
   server.send(200, "text/html", sendHTML());
 }
-/*-------------------------Motor dc y------------------------- */
-void handle_motorY_stop(){
-  motorY_state = "stop";
+
+void handle_motorY_stop() {
+  Serial.println("Motor Y: Detener");
   server.send(200, "text/html", sendHTML());
 }
-void handle_motorY_forward(){
-  motorY_state = "forward";
+
+void handle_motorY_forward() {
+  Serial.println("Motor Y: Adelante");
   server.send(200, "text/html", sendHTML());
 }
-void handle_motorY_backward(){
-  motorY_state = "backward";
+
+void handle_motorY_backward() {
+  Serial.println("Motor Y: Atrás");
   server.send(200, "text/html", sendHTML());
 }
-/*-------------------------IA------------------------- */
-void handle_ia(){
-  // Toggle pump state between "go" and "stop"
-  if (pump_state == "go") {
-    pump_state = "stop";
-  } else {
-    pump_state = "go";
-  }
+
+void handle_ia() {
+  Serial.println("Riego: Activar/Desactivar");
   server.send(200, "text/html", sendHTML());
 }
-/*-------------------------Not found------------------------- */
-void handle_NotFound(){
+
+void handle_NotFound() {
   server.send(404, "text/plain", "404: Not found");
 }
-/*-------------------------HTML------------------------- */
+
+// Función para generar la página HTML
 String sendHTML(){
     String html = "<!DOCTYPE html>\n";
     html += "<html lang=\"es\">";
@@ -429,7 +318,7 @@ String sendHTML(){
     
     // Stepper motor (Z-axis) controls
     html += "<div class='control-panel'>\n";
-    html += "<h3>Vertical:</h3>\n";
+    html += "<h3>vertical:</h3>\n";
     html += "<a href=\"/stepmotor/backward\"><button class=\"backward\">Bajar</button></a>\n";
     html += "<a href=\"/stepmotor/stop\"><button class=\"stop\">Detener</button></a>\n";
     html += "<a href=\"/stepmotor/forward\"><button class=\"forward\">Subir</button></a>\n";
