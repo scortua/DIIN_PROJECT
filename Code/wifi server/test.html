@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vivero Don Honorio</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            text-align: center;
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><text x="10" y="50" font-size="40" opacity="0.5">🪴</text></svg>');
+            background-repeat: repeat;
+        }
+        h1 {
+            color: #4CAF50;
+        }
+        h2 {
+            color: #2196F3;
+        }
+        .section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+        }
+        .data {
+            font-size: 18px;
+            margin: 10px 0;
+        }
+        .data-section {
+            display: inline-block;
+            width: 45%;
+            vertical-align: top;
+            margin: 10px;
+        }
+        .data-title {
+            font-weight: bold;
+            font-size: 20px;
+            margin-bottom: 10px;
+            color: #2196F3;
+        }
+        .bold-data {
+            font-weight: bold;
+        }
+        .control-panel {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            width: 120px;
+        }
+        button:hover {
+            background-color: #45a049;
+            transform: scale(1.05);
+        }
+        .stop {
+            background-color: #f44336;
+        }
+        .stop:hover {
+            background-color: #d32f2f;
+        }
+        .forward {
+            background-color: #2196F3;
+        }
+        .backward {
+            background-color: #ff9800;
+        }
+        .water {
+            background-color: #00bcd4;
+        }
+        .go {
+            background-color: #00bcd4;
+        }
+    </style>
+</head>
+<body>
+    <h1>Vivero Don Honorio</h1>
+
+    <!-- Información del sistema -->
+    <div class="section">
+        <h2>Información del Sistema</h2>
+        <div class="data-section">
+            <div class="data-title">Temperatura</div>
+            <div class="data"><span class="bold-data">Actual:</span> 25 °C</div>
+            <div class="data"><span class="bold-data">Máxima:</span> 30 °C</div>
+            <div class="data"><span class="bold-data">Mínima:</span> 20 °C</div>
+            <div class="data"><span class="bold-data">Promedio:</span> 25 °C</div>
+        </div>
+        <div class="data-section">
+            <div class="data-title">Humedad</div>
+            <div class="data"><span class="bold-data">Actual:</span> 60 %</div>
+            <div class="data"><span class="bold-data">Máxima:</span> 80 %</div>
+            <div class="data"><span class="bold-data">Mínima:</span> 40 %</div>
+            <div class="data"><span class="bold-data">Promedio:</span> 60 %</div>
+        </div>
+    </div>
+
+    <!-- Panel de control -->
+    <div class="section" style="background-color: #f5f5f5; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);"></div>
+        <h2>Panel de Control</h2>
+        <div class="control-panel">
+            <h3>Brazos:</h3>
+            <button class="backward">Atrás</button>
+            <button class="stop">Detener</button>
+            <button class="forward">Adelante</button>
+        </div>
+        <div class="control-panel">
+            <h3>Cabezal:</h3>
+            <button class="backward">Atrás</button>
+            <button class="stop">Detener</button>
+            <button class="forward">Adelante</button>
+        </div>
+        <div class="control-panel">
+            <h3>Vertical:</h3>
+            <button class="backward">Bajar</button>
+            <button class="stop">Detener</button>
+            <button class="forward">Subir</button>
+        </div>
+        <div class="control-panel">
+            <h3>Riego:</h3>
+            <button class="go">Iniciar Riego</button>
+        </div>
+        
+        <script>
+            // Aplicar estilos a las secciones de información y control
+            document.addEventListener('DOMContentLoaded', function() {
+            const sections = document.querySelectorAll('.section');
+            sections.forEach(section => {
+                section.style.backgroundColor = '#e8f0f5'; // Azul grisáceo claro
+                section.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.1)';
+                section.style.border = '2px solid #b0c4de'; // Borde azul grisáceo
+            });
+            });
+        </script>
+    </div>
+
+    <!-- Footer -->
+    <div class="section" style="background-color: #4CAF50; color: white; padding: 20px; margin-top: 30px;">
+        <h2>Contacto</h2>
+        <div style="display: flex; justify-content: center; flex-wrap: wrap; gap: 20px;">
+            <p>Desarrollado por: Grupo Vivero Don Honorio</p>
+            <p>Correo: contacto@viverodonhonorio.com</p>
+        </div>
+        <p>Teléfono: +57 301 234 5678</p>
+        <p style="margin-top: 15px; font-size: 14px; border-top: 1px solid rgba(255,255,255,0.3); padding-top: 10px;">© 2025 Don Honorio - TODOS derechos reservados</p>
+    </div>
+
+</body>
+</html>
